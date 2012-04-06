@@ -1,5 +1,7 @@
 module Remaining::ActAsChange
   
+  # Those accessors are assumed to be present in the classes this module is mixed in with.
+  # TODO move them out to the DSL classes for clarity and document these.
   attr_accessor :amount
   attr_reader :start_date, :end_date, :date, :periodicity
   
@@ -25,15 +27,13 @@ module Remaining::ActAsChange
     raise "Cannot parse #{duration}" if periodicity.nil?
   end
   
-  def total_changed(other_end_date = nil)
+  def total_changed(other_start_date = start_date, other_end_date = end_date)
     raise "Cannot compute total_changed, schedule missing" if start_date.nil?
-    raise "No end of period provided" if other_end_date.nil? && end_date.nil?
+    raise "No end of period provided" if other_end_date.nil?
     raise "Cannot compute total_changed, amount missing" if amount.nil?
     return amount if periodicity.nil?
-    amount * ((other_end_date || end_date) - start_date)/periodicity
+    amount * (other_end_date - other_start_date)/periodicity
   end
-  
-  
   
   private
   

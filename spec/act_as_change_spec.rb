@@ -146,15 +146,20 @@ describe Remaining::ActAsChange do
         @change = create_valid_change
         @change.every("1m")
         @change.amount = @amount = 1.3
-        @change.schedule(Date.today - (5 * 60), Date.today + (5 * 60))
+        @middle_of_period = Time.now
+        @change.schedule(@middle_of_period - (5 * 60), @middle_of_period + (5 * 60))
       end
       
       it "should give the amount times the number of occurrences the change will happen" do
         @change.total_changed.should == @amount * 10
       end
       
-      it "should take an optional parameter for an end date" do
-        @change.total_changed(Date.today).should == @amount * 5
+      it "should accept to use a different start date" do
+        @change.total_changed(@middle_of_period).should == @amount * 5
+      end
+      
+      it "should take parameters optionally for a start date and end date" do
+        @change.total_changed(@middle_of_period, @middle_of_period + 60).should == @amount
       end
     end
   end
