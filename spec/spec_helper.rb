@@ -6,8 +6,12 @@ require File.expand_path("../lib/remaining", File.dirname(__FILE__))
 module Remaining::ObjectMother
   
   class MyForecast
-    attr_accessor :changes
+    attr_reader :changes
     include Remaining::ActAsForecast
+    
+    def initialize
+      @changes = []
+    end
   end
   
   class MyChange
@@ -36,8 +40,13 @@ module Remaining::ObjectMother
   end
   
   def days_from_now(number_of_days)
-    Time.now + 86400 * number_of_days
+    now + 86400 * number_of_days
   end
+  
+  def now
+    @base_time ||= Time.now
+  end
+  
 end
 
 RSpec.configure do |config|

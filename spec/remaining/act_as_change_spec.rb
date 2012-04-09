@@ -1,4 +1,4 @@
-require File.expand_path("spec_helper", File.dirname(__FILE__))
+require File.expand_path("../spec_helper", File.dirname(__FILE__))
 
 describe Remaining::ActAsChange do
   
@@ -19,7 +19,7 @@ describe Remaining::ActAsChange do
   describe "#schedule" do
     it "should provide a convenience class to set start and end dates" do
       change = create_valid_change
-      change.schedule(start_date = Time.now, end_date = Time.now + 86400)
+      change.schedule(start_date = now, end_date = tomorrow)
       change.date.should be_nil
       change.start_date.should == start_date
       change.end_date.should == end_date
@@ -27,7 +27,7 @@ describe Remaining::ActAsChange do
     
     it "should make the end date optional" do
       change = create_valid_change
-      lambda { change.schedule(Time.now) }.should_not raise_error
+      lambda { change.schedule(now) }.should_not raise_error
       change.end_date.should be_nil
     end
     
@@ -39,7 +39,7 @@ describe Remaining::ActAsChange do
     
     it "should ensure start date is less than end date" do
       change = create_valid_change
-      lambda { change.schedule(Time.now + 86400, Time.now) }.should raise_error "Start date cannot be later than end date"
+      lambda { change.schedule(tomorrow, now) }.should raise_error "Start date cannot be later than end date"
     end
   end
   
@@ -47,7 +47,7 @@ describe Remaining::ActAsChange do
     
     it "should provide a convenience method to set a punctual use" do
       change = create_valid_change
-      change.at(date = Time.now)
+      change.at(date = now)
       change.date.should == date
       change.start_date.should == date
       change.end_date.should == date
@@ -56,7 +56,7 @@ describe Remaining::ActAsChange do
     
     it "should accept dates as string format" do
       change = create_valid_change
-      date = Time.now
+      date = now
       change.at(date.to_s)
       change.date.to_i.should == date.to_i
       change.start_date.to_i.should == date.to_i
@@ -73,7 +73,7 @@ describe Remaining::ActAsChange do
   describe "#in" do
     it "should take a parseable string" do
       change = create_valid_change
-      date = Time.now + 20 * 60
+      date = now + 20 * 60
       change.in('20m')
       change.date.to_i.should == date.to_i
       change.start_date.to_i.should == date.to_i
@@ -124,14 +124,14 @@ describe Remaining::ActAsChange do
     
     it "should raise an exception if no amount was set" do
       change = create_valid_change
-      change.at(Time.now)
+      change.at(now)
       
       lambda { change.total_changed }.should raise_error "Cannot compute total_changed, amount missing"
     end
     describe "for a punctual change" do
       before(:each) do
         @change = create_valid_change
-        @change.at(Time.now)
+        @change.at(now)
         @change.amount = @amount = 1.3
       end
       
@@ -146,7 +146,7 @@ describe Remaining::ActAsChange do
         @change = create_valid_change
         @change.every("1m")
         @change.amount = @amount = 1.3
-        @middle_of_period = Time.now
+        @middle_of_period = now
         @change.schedule(@middle_of_period - (5 * 60), @middle_of_period + (5 * 60))
       end
       

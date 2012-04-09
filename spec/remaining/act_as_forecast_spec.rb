@@ -1,4 +1,4 @@
-require File.expand_path("spec_helper", File.dirname(__FILE__))
+require File.expand_path("../spec_helper", File.dirname(__FILE__))
 
 describe Remaining::ActAsForecast do
   describe ".calculate" do
@@ -16,7 +16,7 @@ describe Remaining::ActAsForecast do
       before(:each) do
         @forecast = create_valid_forecast
         @hit_date = days_from_now(12)
-        @forecast.changes = [create_valid_change(:amount => 10, :date => Time.now)]
+        @forecast.changes << create_valid_change(:amount => 10, :date => now)
         @forecast.changes << create_valid_change(:amount => -1, :date => tomorrow)
         @forecast.changes << create_valid_change(:amount => -1, :date => days_from_now(3))
         @forecast.changes << create_valid_change(:amount => -3, :date => days_from_now(4))
@@ -37,11 +37,9 @@ describe Remaining::ActAsForecast do
     describe "when there are repeated uses" do
       before(:each) do
         @forecast = create_valid_forecast
-        @base_time = Time.now
-        @hit_date = @base_time + 86400 * 12
-        @forecast.changes = [create_valid_change(:amount => 10, :date => @base_time)]
-        
-        @forecast.changes << create_valid_change(:amount => -1, :periodicity => "1d", :start_date => @base_time + 86400, :end_date => @hit_date)
+        @hit_date = days_from_now(12)
+        @forecast.changes << create_valid_change(:amount => 10, :date => now)
+        @forecast.changes << create_valid_change(:amount => -1, :periodicity => "1d", :start_date => tomorrow, :end_date => @hit_date)
       end
       
       it "should create at least one interval with the non periodic change" do
@@ -62,23 +60,23 @@ describe Remaining::ActAsForecast do
       end
       
       it "in 0 day, there should be 10 left" do
-        @forecast.calculate(10).should == (@base_time)
+        @forecast.calculate(10).should == now
       end
             
       it "in 2 days, there should be 9 left" do
-        @forecast.calculate(9).should == (@base_time + 86400 * 2)
+        @forecast.calculate(9).should == days_from_now(2)
       end
       
       it "in 3 days, there should be 8 left" do
-        @forecast.calculate(8).should == (@base_time + 86400 * 3)
+        @forecast.calculate(8).should == days_from_now(3)
       end
       
       it "in 4 days, there should be 7 left" do
-        @forecast.calculate(7).should == (@base_time + 86400 * 4)
+        @forecast.calculate(7).should == days_from_now(4)
       end
       
       it "should find the date at which the target value is matched" do
-        @forecast.calculate.should == (@hit_date  - 86400)
+        @forecast.calculate.should == days_from_now(11)
       end
     end
   end
@@ -93,7 +91,7 @@ describe Remaining::ActAsForecast do
     describe "when there are punctual uses" do
       it "should provide with the slope and offset" do
         @forecast = create_valid_forecast
-        @forecast.changes = [create_valid_change(:amount => 5, :date => Time.at(0))]
+        @forecast.changes << create_valid_change(:amount => 5, :date => Time.at(0))
         @forecast.changes << create_valid_change(:amount => -1, :date => Time.at(1))
         @forecast.changes << create_valid_change(:amount => -1, :date => Time.at(2))
         @forecast.changes << create_valid_change(:amount => -1, :date => Time.at( 3))
@@ -110,10 +108,9 @@ describe Remaining::ActAsForecast do
     describe "when there are repeated uses" do
       before(:each) do
         @forecast = create_valid_forecast
-        @hit_date = Time.now + 5
-        @forecast.changes = [create_valid_change(:amount => 5, :date => Time.now)]
-        
-        @forecast.changes << create_valid_change(:amount => -1, :periodicity => "1s", :start_date => Time.now, :end_date => @hit_date)
+        @hit_date = now + 5
+        @forecast.changes << create_valid_change(:amount => 5, :date => now)
+        @forecast.changes << create_valid_change(:amount => -1, :periodicity => "1s", :start_date => now + 0.01, :end_date => @hit_date)
       end
       
       it "should provide with the slope and offset" do

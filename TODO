@@ -1,0 +1,5 @@
+* Write README
+* Make sure to move all accessors to DSL
+* Periodicity : months are not all 30 days
+* Return start and end date for calculate
+* Finish least squares and calculate by least squares
