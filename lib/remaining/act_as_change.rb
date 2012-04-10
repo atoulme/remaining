@@ -1,17 +1,6 @@
 module Remaining
   module ActAsChange
   
-    # Those accessors are assumed to be present in the classes this module is mixed in with.
-    # amount
-    #   the amount of change, positive or negative.
-    # start_date
-    #   the start date of the change
-    # end_date
-    #   the end date of the change, or nil if there is no end is scheduled for the change.
-    #   Note the end date and start date are the same if the change is not periodic.
-    # periodicity
-    #   A string representing the periodicity of the change. It may be nil.
-    #   1d: daily.
     def schedule(start_date = Time.now, end_date = nil)
       raise "Start date cannot be later than end date" if end_date && start_date > end_date
       @start_date = start_date

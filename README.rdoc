@@ -1,0 +1,58 @@
+= Remaining
+
+== About
+
+Remaining is a Ruby library to compute remaining amounts and calculate when you will run out using forecasts based on changes or by regressing the changes to a linear equation using the least squares method.
+
+Remaining should blend in nicely with Rails apps out there.
+
+== License
+
+Remaining is licensed under the MIT license.
+
+== How to use
+
+Remaining needs two classes to mix in with, which will need to have attributes and accessors for the following:
+
+  class Forecast
+    # This attribute must point to an array of Change objects declared below.
+    attr_accessor :changes
+    
+    include Remaining::ActAsForecast
+  end
+  
+  class Change
+    # amount
+    #   the amount of change, positive or negative.
+    # start_date
+    #   the start date of the change
+    # end_date
+    #   the end date of the change, or nil if there is no end is scheduled for the change.
+    #   Note the end date and start date are the same if the change is not periodic.
+    # periodicity
+    #   A string representing the periodicity of the change. It may be nil.
+    #   1d: daily.
+    attr_accessor :amount, :start_date, :end_date, :periodicity
+    
+    include Remaining::ActAsChange
+  end
+  
+Once in place, you can then do things like:
+
+  forecast = Forecast.new
+  achange = Change.new(:amount => 10, :start_date => Time.now, :end_date => Time.now + 5 * 86400, "1d")
+  anotherchange = Change.new(:amount => -5, :start_date => Time.now, :end_date => Time.now + 1 * 86400, "1h")
+  forecast.changes = [achange, anotherchange]
+  forecast.calculate
+  forecast.calculate_with_least_squares
+
+
+With Rails, using ActiveRecord objects for Forecast and Change should fit right in.
+
+== Install
+
+gem install remaining
+
+== Contact
+
+This library is currently developed by Antoine Toulme (atoulme). Please fork and provide pull requests if you want to contribute.
