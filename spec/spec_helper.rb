@@ -15,6 +15,8 @@ module Remaining::ObjectMother
   end
   
   class MyChange
+    attr_accessor :amount
+    attr_reader :start_date, :end_date, :periodicity
     include Remaining::ActAsChange
   end
   

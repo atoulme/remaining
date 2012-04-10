@@ -20,7 +20,6 @@ describe Remaining::ActAsChange do
     it "should provide a convenience class to set start and end dates" do
       change = create_valid_change
       change.schedule(start_date = now, end_date = tomorrow)
-      change.date.should be_nil
       change.start_date.should == start_date
       change.end_date.should == end_date
     end
@@ -48,7 +47,6 @@ describe Remaining::ActAsChange do
     it "should provide a convenience method to set a punctual use" do
       change = create_valid_change
       change.at(date = now)
-      change.date.should == date
       change.start_date.should == date
       change.end_date.should == date
       change.periodicity.should be_nil
@@ -58,7 +56,6 @@ describe Remaining::ActAsChange do
       change = create_valid_change
       date = now
       change.at(date.to_s)
-      change.date.to_i.should == date.to_i
       change.start_date.to_i.should == date.to_i
       change.end_date.to_i.should == date.to_i
       change.periodicity.should be_nil
@@ -75,7 +72,6 @@ describe Remaining::ActAsChange do
       change = create_valid_change
       date = now + 20 * 60
       change.in('20m')
-      change.date.to_i.should == date.to_i
       change.start_date.to_i.should == date.to_i
       change.end_date.to_i.should == date.to_i
       change.periodicity.should be_nil
@@ -93,21 +89,24 @@ describe Remaining::ActAsChange do
     it "should take a parseable string" do
       change = create_valid_change
       change.every("20m")
-      change.date.should be_nil
+      change.start_date.should be_nil
+      change.end_date.should be_nil
       change.periodicity.should == 20 * 60
     end
     
     it "should accept a float value" do
       change = create_valid_change
       change.every(0.2)
-      change.date.should be_nil
+      change.start_date.should be_nil
+      change.end_date.should be_nil
       change.periodicity.should == 0.2
     end
     
     it "should accept a fixnum value" do
       change = create_valid_change
       change.every(1000)
-      change.date.should be_nil
+      change.start_date.should be_nil
+      change.end_date.should be_nil
       change.periodicity.should == 1000
     end
     

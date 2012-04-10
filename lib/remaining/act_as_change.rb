@@ -1,10 +1,16 @@
 module Remaining::ActAsChange
   
   # Those accessors are assumed to be present in the classes this module is mixed in with.
-  # TODO move them out to the DSL classes for clarity and document these.
-  attr_accessor :amount
-  attr_reader :start_date, :end_date, :date, :periodicity
-  
+  # amount
+  #   the amount of change, positive or negative.
+  # start_date
+  #   the start date of the change
+  # end_date
+  #   the end date of the change, or nil if there is no end is scheduled for the change.
+  #   Note the end date and start date are the same if the change is not periodic.
+  # periodicity
+  #   A string representing the periodicity of the change. It may be nil.
+  #   1d: daily.
   def schedule(start_date = Time.now, end_date = nil)
     raise "Start date cannot be later than end date" if end_date && start_date > end_date
     @start_date = start_date
@@ -12,14 +18,14 @@ module Remaining::ActAsChange
   end
   
   def at(date)
-    @date = date.is_a?(Time) ? date : Chronic.parse(date)
-    raise "Cannot parse #{date} as a date" if @date.nil?
-    @start_date = @end_date = @date
+    date = date.is_a?(Time) ? date : Chronic.parse(date)
+    raise "Cannot parse #{date} as a date" if date.nil?
+    @start_date = @end_date = date
   end
   
   def in(duration)
-    @date = Time.now + parse_time_string(duration)
-    @start_date = @end_date = @date
+    date = Time.now + parse_time_string(duration)
+    @start_date = @end_date = date
   end
   
   def every(duration)
