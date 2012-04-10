@@ -1,7 +1,7 @@
 require File.expand_path("../spec_helper", File.dirname(__FILE__))
 
 describe Remaining::ActAsForecast do
-  describe ".calculate" do
+  describe "#calculate" do
     
     it "should not give a result if there is no changes" do
       forecast = create_valid_forecast
@@ -9,7 +9,8 @@ describe Remaining::ActAsForecast do
     end
     
     it "should take an optional argument to calculate with a target value (default is 0)" do
-      pending
+      forecast = create_valid_forecast
+      forecast.calculate(3).should == nil
     end
     
     describe "when there are punctual uses" do
@@ -25,7 +26,7 @@ describe Remaining::ActAsForecast do
       end
       
       it "should use the punctual uses to see which one in the future will pass the target value" do
-        @forecast.calculate.should == @hit_date
+        @forecast.calculate.should == [@hit_date] * 2
       end
       
       it "should use the punctual uses to see which one in the future will pass the target value" do
@@ -55,39 +56,55 @@ describe Remaining::ActAsForecast do
       end
       
       it "should have a series of known intervals" do
-        pending("Need to count the intervals")
         @forecast.send(:intervals).size.should == 11
       end
       
       it "in 0 day, there should be 10 left" do
-        @forecast.calculate(10).should == now
+        @forecast.calculate(10).should == [now] * 2
       end
             
       it "in 2 days, there should be 9 left" do
-        @forecast.calculate(9).should == days_from_now(2)
+        @forecast.calculate(9).should == [days_from_now(2), days_from_now(3)]
       end
       
       it "in 3 days, there should be 8 left" do
-        @forecast.calculate(8).should == days_from_now(3)
+        @forecast.calculate(8).should == [days_from_now(3), days_from_now(4)]
       end
       
       it "in 4 days, there should be 7 left" do
-        @forecast.calculate(7).should == days_from_now(4)
+        @forecast.calculate(7).should == [days_from_now(4), days_from_now(5)]
       end
       
       it "should find the date at which the target value is matched" do
-        @forecast.calculate.should == days_from_now(11)
+        @forecast.calculate.should == [days_from_now(11), days_from_now(12)]
       end
     end
   end
   
-  describe ".calculate_with_least_squaresx" do
-    it "" do
-      pending
+  describe "#calculate_with_least_squares(target)" do
+    it "should provide a date at which the target will be reached" do
+      @forecast = create_valid_forecast
+      @forecast.changes << create_valid_change(:amount => 5, :date => Time.at(0))
+      @forecast.changes << create_valid_change(:amount => -1, :date => Time.at(1))
+      @forecast.changes << create_valid_change(:amount => -1, :date => Time.at(2))
+      @forecast.changes << create_valid_change(:amount => -1, :date => Time.at(3))
+      @forecast.changes << create_valid_change(:amount => -1, :date => Time.at(4))
+      @forecast.changes << create_valid_change(:amount => -1, :date =>Time.at(5))
+      @forecast.calculate_with_least_squares.should == Time.at(5)
+    end
+    
+    it "should return nil if the target would be reached before the first change" do
+      @forecast = create_valid_forecast
+      @forecast.changes << create_valid_change(:amount => 1, :date => Time.at(1))
+      @forecast.changes << create_valid_change(:amount => 1, :date => Time.at(2))
+      @forecast.changes << create_valid_change(:amount => 1, :date => Time.at(3))
+      @forecast.changes << create_valid_change(:amount => 1, :date => Time.at(4))
+      @forecast.changes << create_valid_change(:amount => 1, :date =>Time.at(5))
+      @forecast.calculate_with_least_squares.should be_nil
     end
   end
   
-  describe ".least_squares" do
+  describe "#least_squares" do
     describe "when there are punctual uses" do
       it "should provide with the slope and offset" do
         @forecast = create_valid_forecast
@@ -100,7 +117,6 @@ describe Remaining::ActAsForecast do
         slope, offset = @forecast.least_squares
         slope.round.should == -1.0
         offset.round.should == 5
-      
       end
     
     end
