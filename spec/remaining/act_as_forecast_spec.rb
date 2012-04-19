@@ -35,10 +35,9 @@ describe Remaining::ActAsForecast do
       end
     end
     
-    describe "when there are repeated uses" do
+    shared_examples_for "repeated uses" do
       before(:each) do
         @forecast = create_valid_forecast
-        @hit_date = days_from_now(12)
         @forecast.changes << create_valid_change(:amount => 10, :date => now)
         @forecast.changes << create_valid_change(:amount => -1, :periodicity => "1d", :start_date => tomorrow, :end_date => @hit_date)
       end
@@ -53,10 +52,6 @@ describe Remaining::ActAsForecast do
       
       it "should have a last interval which total_changed should be -1" do
         @forecast.send(:intervals).last.total_changed.should == -1
-      end
-      
-      it "should have a series of known intervals" do
-        @forecast.send(:intervals).size.should == 11
       end
       
       it "in 0 day, there should be 10 left" do
@@ -78,6 +73,22 @@ describe Remaining::ActAsForecast do
       it "should find the date at which the target value is matched" do
         @forecast.calculate.should == [days_from_now(11), days_from_now(12)]
       end
+    end
+    
+    describe "when there are repeated uses" do
+      before(:each) do
+        @hit_date = days_from_now(12)
+      end
+      
+      it_should_behave_like "repeated uses"
+    end
+    
+    describe "when there are unbounded repeated uses" do
+      before(:each) do
+        @hit_date = nil
+      end
+      
+      it_should_behave_like "repeated uses"
     end
   end
   
@@ -133,6 +144,20 @@ describe Remaining::ActAsForecast do
         slope, offset = @forecast.least_squares
         slope.should be_within(0.01).of(-1.0)
         offset.should be_within(0.01).of(5)
+      end
+    end
+    
+    describe "when there are repeated, unbounded uses" do
+      before(:each) do
+        @forecast = create_valid_forecast
+        @forecast.changes << create_valid_change(:amount => 5, :date => now)
+        @forecast.changes << create_valid_change(:amount => -1, :periodicity => "1s", :start_date => now + 0.01, :end_date => nil)
+      end
+      
+      it "should provide the slope and offset anyway" do
+        slope, offset = @forecast.least_squares
+        slope.should be_within(0.1).of(-1.0)
+        offset.should be_within(0.2).of(5)
       end
     end
     

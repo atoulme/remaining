@@ -23,12 +23,17 @@ module Remaining
       raise "Cannot parse #{duration}" if periodicity.nil?
     end
   
-    def total_changed(other_start_date = start_date, other_end_date = end_date)
+    def total_changed(other_start_date = start_date, other_end_date = nil)
       raise "Cannot compute total_changed, schedule missing" if start_date.nil?
+      other_end_date ||= determined_end_date
       raise "No end of period provided" if other_end_date.nil?
       raise "Cannot compute total_changed, amount missing" if amount.nil?
       return amount if periodicity.nil?
       amount * (other_end_date - other_start_date)/periodicity
+    end
+    
+    def determined_end_date
+      end_date || start_date + (@periodicity * 20)
     end
   
     private

@@ -163,4 +163,17 @@ describe Remaining::ActAsChange do
     end
   end
   
+  describe "#determined_end_date" do
+    it "should be #end_date if not nil" do
+      change = create_valid_change(:start_date => tomorrow, :end_date => days_from_now(3))
+      change.determined_end_date.should == change.end_date
+    end
+    
+    it "should be the periodicity times 20 plus the start date if no end date is present and the change is periodic" do
+      change = create_valid_change(:start_date => tomorrow)
+      change.every("1d")
+      change.determined_end_date.should == days_from_now(21)
+    end
+  end
+  
 end

@@ -80,13 +80,13 @@ module Remaining
     end
     
     def periodic_interval(change)
-      (1..((change.end_date - change.start_date)/change.periodicity).floor).map { |i| change.start_date + (change.periodicity * i) }
+      (1..((change.determined_end_date - change.start_date)/change.periodicity).floor).map { |i| change.start_date + (change.periodicity * i) }
     end
-  
-    def changes_in(start_date, end_date = nil)
-      changes.select { |change| change.start_date <= start_date && (end_date.nil? ? change.end_date.nil? : end_date <= change.end_date) }
+
+    def changes_in(start_date, end_date)
+      changes.select { |change| change.start_date <= start_date && !end_date.nil? && end_date <= change.determined_end_date }
     end
-  
+
     # Copied from https://gist.github.com/990667
     def regression(x, y, degree)
       x_data = x.map {|xi| (0..degree).map{|pow| (xi**pow) }}
